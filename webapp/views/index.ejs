@@ -1,0 +1,185 @@
+<html>
+<head>
+    <link href="css/index.css" rel="stylesheet">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-animate.js"></script>
+    <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.3.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/directives/enter.js"></script>
+    <script src="js/controllers/HouseController.js"></script>
+    <script src="js/controllers/MusicController.js"></script>
+
+</head>
+<body ng-app="houseApp" ng-controller="HouseController">
+<div class="leftSide">
+
+    <canvas width="600px" height="600px" id="seconds">
+    </canvas>
+    <canvas width="600px" height="600px" id="minutes">
+    </canvas>
+    <canvas width="600px" height="600px" id="hours">
+    </canvas>
+    <div class="temperature">
+        <br>
+        <br>
+        <span class="clock">{{hours}}: {{minutes}}</span>
+        <br class="small">
+        <span class="music">{{day}}/{{month+1}}</span>
+        <br>
+        {{weather.current_observation.temp_f}}°F | {{weather.current_observation.temp_c}}°C
+        <br>
+
+       <span class="music">H: {{forecast.forecast.simpleforecast.forecastday[0].high.fahrenheit}} L: {{forecast.forecast.simpleforecast.forecastday[0].low.fahrenheit}}
+       </span>
+        <br>
+        <br>
+
+        <div class='music' ng-show="currentSong.playingExternal" ng-click="music()">
+            <img width='100px' id ='albumArt' ng-src="{{currentSong.track.albumArtRef[0].url}}">
+            <br>
+            {{currentSong.track.artist}} : {{currentSong.track.title}}
+        </div>
+    </div>
+    </br>
+</div>
+
+<div class="rightSide">
+    <div ng-show="homePage">
+        <br>
+        <table>
+            <tr>
+                <td>
+                    <button class="houseButton" ng-click="submitCode()">
+                        Coffee
+                    </button>
+                </td>
+                <td>
+                    <button class="houseButton" ng-click="music()">
+                        Music
+                    </button>
+                </td>
+                <td>
+
+                    <button class="houseButton">
+                        Bedroom light
+                    </button>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div ng-show="musicPage" ng-controller="MusicController">
+        <div id="iconHolders">
+            <img width='60px' style='float:right' ng-click="goHome()"
+                 src="images/home.png">
+        </div>
+        <div class="searchHolder">
+            <img width='30px' style='float:left' ng-show="showBack" ng-click="back()"
+                 src="images/back.png">
+            <input type="text" ng-model="search" id="search" ng-enter="searchMusic()" class="search">
+        </div>
+        <div id="resultContainer">
+            <div class="player">
+            <div ng-show="currentSong.playingExternal">
+                <img width='100%'  height="400px" ng-src="{{currentSong.track.albumArtRef[0].url}}">
+
+                <table class="resultTable">
+                    <tr>
+                        <td ng-click="killSong()">Stop</td>
+                        <td ng-click="openArtist(currentSong)">{{currentSong.track.artist}}</td>
+                        <td>{{currentSong.track.title}}</td>
+                        <td ng-click="openAlbum(currentSong.albumId)">{{currentSong.album}}</td>
+
+                    </tr>
+                </table>
+            </div>
+                </br>
+                </br>
+                </br>
+
+            </div>
+            <div id="artistContainer" ng-show="artist">
+                <img width='100%' ng-src="{{artistResult.artistArtRef}}">
+                <br>
+
+                <p>
+                    {{artistResult.artistBio}}
+                </p>
+                </br>
+                <span class="lef"> <h2>Albums</h2></span>
+
+                <div class="cent">
+            <span ng-repeat="result in artistResult.albums" class="cent">
+                <img width='200px' title="{{result.name}}" ng-click="openAlbum(result.albumId)"
+                     ng-src="{{result.albumArtRef}}">
+            </span>
+                </div>
+                </br>
+                <span class="lef"><h2>Top Tracks</h2></span>
+                <br>
+                <table class="resultTable">
+                    <tr ng-repeat="result in artistResult.topTracks | filter: {track : '!' }">
+                        <td ng-click="playExternal(artistResult.topTracks, result)">{{result.title}}</td>
+                    </tr>
+                </table>
+            </div>
+            <div id="albumContainer" ng-show="album">
+                <img width='100%' ng-src="{{albumResult.albumArtRef}}">
+                <br>
+
+                <span class="lef"> <h2>Tracks</h2></span>
+                <br>
+                <table class="resultTable">
+                    <tr ng-repeat="result in albumResult.tracks | filter: {track : '!' }"
+                        ng-click="playExternal(albumResult.tracks, result)">
+                        <td>{{result.artist}}</td>
+                        <td>{{result.title}}</td>
+                    </tr>
+                </table>
+            </div>
+            <div id="searchContainer" ng-show="general">
+
+                <span style='float:left;' ng-click="artistContainer = !artistContainer">Show/Hide</span>
+
+                <div ng-show="artistContainer">
+                    <span class="lef"> <h2>Artists</h2></span>
+                    <table class="resultTable">
+                        <tr ng-repeat="result in artists | filter: {album : '!' }" ng-click="openArtist(result)">
+                            <td>{{result.artist.name}}</td>
+                        </tr>
+                    </table>
+                </div>
+                </br>
+                <span style='float:left;' ng-click="albumContainer = !albumContainer">Show/Hide</span>
+
+                <div ng-show="albumContainer">
+                    <span class="lef"> <h2>Albums</h2></span>
+                    <div class="cent">
+     <span ng-repeat="result in albums">
+                <img width='200px' title="{{result.album.name}}" ng-click="openAlbum(result.album.albumId)"
+                     ng-src="{{result.album.albumArtRef}}">
+            </span>
+                    </div>
+                    </br>
+
+                    <span style='float:left;' ng-click="trackContainer = !trackContainer">Show/Hide</span>
+
+                    <div ng-show="trackContainer">
+                        <span class="lef"> <h2>Tracks</h2></span>
+                        <table class="resultTable">
+                            <tr ng-repeat="result in results | filter: {track : '!' }">
+                                <td ng-click="checkIP(result)">Play</td>
+                                <td ng-click="openArtist(result.track)">{{result.track.artist.artist}}</td>
+                                <td ng-click="checkIP(result)">{{result.track.title}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
