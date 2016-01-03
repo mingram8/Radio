@@ -4,4 +4,4 @@
 
 <h2>How to use it</h2>
 
-<p>You need to have <a href="github.com/timleland/rfoutlet">rfoutlet</a> installed on a raspberry pi and have a rf transmitter wired. Then do a npm install and it should all work.</ap>
+<p>You need to have <a href="http://www.github.com/timleland/rfoutlet">rfoutlet</a> installed on a raspberry pi and have a rf transmitter wired. Then do a npm install and it should all work.</ap>
